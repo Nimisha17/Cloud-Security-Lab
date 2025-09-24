@@ -37,3 +37,7 @@ The following 4 vulnerabilities are highlihted in this lab.
 Note: Replace the email ids in the config file before deploying.
 further clear instructions on adding missing resources will be updated.
 
+## Clean-up:
+- delete the instances using terraform to clean up.
+  ```bash
+  terraform destroy -var="project_id=<YOUR_PROJECT_ID>"
