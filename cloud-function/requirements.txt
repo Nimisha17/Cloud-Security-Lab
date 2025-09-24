@@ -1,0 +1,8 @@
+
+---
+
+## `cloud-function/requirements.txt`
+This keeps dependencies lightweight. For our lab, we don’t need extras, but it’s good practice:
+
+```txt
+functions-framework==3.*
