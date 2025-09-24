@@ -120,23 +120,32 @@ resource "google_storage_bucket_object" "cf_zip" {
   source = "function.zip" # <-- zip of index.js or main.py
 }
 
-resource "google_cloudfunctions_function" "unauth_function" {
-  name        = "leaky-func"
-  description = "Unauthenticated function leaking secrets"
-  runtime     = "python310"
-  region      = var.region
-  entry_point = "hello_http"
+resource "google_cloudfunctions2_function" "unauth_function" {
+  name     = "leaky-func"
+  location = var.region
 
-  source_archive_bucket = google_storage_bucket.cf_bucket.name
-  source_archive_object = google_storage_bucket_object.cf_zip.name
-  trigger_http          = true
+  build_config {
+    runtime     = "python310"
+    entry_point = "hello_http"
+    source {
+      storage_source {
+        bucket = google_storage_bucket.cf_bucket.name
+        object = google_storage_bucket_object.cf_zip.name
+      }
+    }
+  }
 
-  available_memory_mb = 128
+  service_config {
+    max_instance_count = 1
+    available_memory   = "128M"
+    ingress_settings   = "ALLOW_ALL"
 
-  environment_variables = {
-    SECRET_FLAG = "FLAG{cloud_function_leak}"
+    environment_variables = {
+      SECRET_FLAG = "FLAG{cloud_function_leak}"
+    }
   }
 }
+
 
 # Allow allUsers invocation
 resource "google_cloudfunctions_function_iam_member" "invoker" {
