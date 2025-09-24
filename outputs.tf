@@ -7,5 +7,5 @@ output "public_bucket_name" {
 }
 
 output "function_url" {
-  value = google_cloudfunctions_function.unauth_function.https_trigger_url
+  value = google_cloudfunctions2_function.unauth_function.service_config[0].uri
 }

@@ -137,7 +137,7 @@ resource "google_cloudfunctions2_function" "unauth_function" {
 
   service_config {
     max_instance_count = 1
-    available_memory   = "128M"
+    available_memory   = "128Mi"
     ingress_settings   = "ALLOW_ALL"
 
     environment_variables = {
@@ -148,10 +148,43 @@ resource "google_cloudfunctions2_function" "unauth_function" {
 
 
 # Allow allUsers invocation
-resource "google_cloudfunctions_function_iam_member" "invoker" {
-  project        = google_cloudfunctions_function.unauth_function.project
-  region         = google_cloudfunctions_function.unauth_function.region
-  cloud_function = google_cloudfunctions_function.unauth_function.name
-  role           = "roles/cloudfunctions.invoker"
-  member         = "allUsers"
+resource "google_cloud_run_service_iam_member" "invoker" {
+  location = google_cloudfunctions2_function.unauth_function.location
+  service  = google_cloudfunctions2_function.unauth_function.name
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}
+
+# -----------------------
+# Ensure required APIs are enabled
+# -----------------------
+
+resource "google_project_service" "compute" {
+  project = var.project_id
+  service = "compute.googleapis.com"
+}
+
+resource "google_project_service" "iam" {
+  project = var.project_id
+  service = "iam.googleapis.com"
+}
+
+resource "google_project_service" "storage" {
+  project = var.project_id
+  service = "storage.googleapis.com"
+}
+
+resource "google_project_service" "cloud_functions" {
+  project = var.project_id
+  service = "cloudfunctions.googleapis.com"
+}
+
+resource "google_project_service" "cloud_run" {
+  project = var.project_id
+  service = "run.googleapis.com"
+}
+
+resource "google_project_service" "artifact_registry" {
+  project = var.project_id
+  service = "artifactregistry.googleapis.com"
 }
